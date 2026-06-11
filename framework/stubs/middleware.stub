@@ -1,0 +1,14 @@
+<?php
+
+namespace Alice\Middlewares;
+
+use Alice\Context;
+use Closure;
+
+class %name%
+{
+    public function __invoke(Context $context, Closure $next)
+    {
+        $next($ctx);
+    }
+}

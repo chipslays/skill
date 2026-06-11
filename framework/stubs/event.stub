@@ -1,0 +1,13 @@
+<?php
+
+namespace Alice\Events;
+
+use Alice\Context;
+
+class %name%
+{
+    public function __invoke(Context $context)
+    {
+        //
+    }
+}

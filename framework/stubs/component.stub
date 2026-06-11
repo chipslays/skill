@@ -1,0 +1,13 @@
+<?php
+
+namespace Alice\Components\%name%;
+
+use Alice\Component as BaseComponent;
+
+class Component extends BaseComponent
+{
+    public function register()
+    {
+        //
+    }
+}

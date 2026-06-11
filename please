@@ -1,0 +1,153 @@
+#!/usr/bin/php
+
+<?php
+
+use Dotenv\Dotenv;
+use Framework\Database\Migration\Manager;
+
+require __DIR__ . '/vendor/autoload.php';
+
+Dotenv::createImmutable(__DIR__)->load();
+
+switch ($argv[1] ?? null) {
+    case 'serve':
+        $port = $argv[2] ?? 8000;
+
+        echo '[ОК] Вебхук: http://localhost:' . $port . '/webhook.php' . PHP_EOL;
+        echo '[!] Необходимо дополнительно запустить тунель, если хотите тестировать в Диалогах.' . PHP_EOL . PHP_EOL;
+
+        shell_exec("php -S localhost:{$port} -t public");
+
+        break;
+
+    case 'migrate:up':
+        Manager::up();
+
+        break;
+
+    case 'migrate:down':
+        $confirm = readline('[!] Действительно удалить все таблицы? [y/N]: ');
+
+        if ($confirm && strtolower($confirm) === 'y') {
+            Manager::down();
+        }
+
+        break;
+
+    case 'migrate:fresh':
+        $confirm = readline('[!] Вы действительно хотите удалить все данные? [y/N]: ');
+
+        if ($confirm && strtolower($confirm) === 'y') {
+            Manager::fresh();
+        } else {
+            echo '[!] Галя, у нас отмена, отмена действия.' . PHP_EOL;
+        }
+
+        break;
+
+    case 'make:component':
+        if (!isset($argv[2])) {
+            die('[!] Укажите название компонента: php please make:component <name>.');
+        }
+
+        $name = $argv[2];
+        $path = project_path('alice/Components/' . $name . '.php');
+
+        if (file_exists($path)) {
+            die('[!] Компонент уже существует: ' . $path . '" ');
+        }
+
+        $stub = file_get_contents(project_path('framework/stubs/component.stub'));
+
+        $stub = str_replace('%name%', $name, $stub);
+
+        file_put_contents($path, $stub);
+
+        echo '[OK] Компонент создан: ' . $path;
+
+        break;
+
+    case 'make:event':
+        if (!isset($argv[2])) {
+            die('[!] Укажите название контролера: php please make:event <name>.');
+        }
+
+        $name = $argv[2];
+        $path = project_path('alice/Events/' . $name . '.php');
+
+        if (file_exists($path)) {
+            die('[!] Событие уже существует: ' . $path . '" ');
+        }
+
+        $stub = file_get_contents(project_path('framework/stubs/event.stub'));
+
+        $stub = str_replace('%name%', $name, $stub);
+
+        file_put_contents($path, $stub);
+
+        echo '[OK] Событие создано: ' . $path;
+
+        break;
+
+    case 'make:middleware':
+        if (!isset($argv[2])) {
+            die('[!] Укажите название мидлвари: php please make:middleware <name>.');
+        }
+
+        $name = $argv[2];
+        $path = project_path('alice/Middlewares/' . $name . '.php');
+
+        if (file_exists($path)) {
+            die('[!] Мидлварь уже существует: ' . $path . '" ');
+        }
+
+        $stub = file_get_contents(project_path('framework/stubs/middleware.stub'));
+
+        $stub = str_replace('%name%', $name, $stub);
+
+        file_put_contents($path, $stub);
+
+        echo '[OK] Мидлварь создана: ' . $path;
+
+        break;
+
+    case 'make:migration':
+        if (!isset($argv[2])) {
+            die('[!] Укажите название таблицы: php please make:migration <table>.');
+        }
+
+        $table = $argv[2];
+        $path = project_path('database/migrations/' . time() . '-table-' . $table . '.php');
+
+        if (file_exists($path)) {
+            die('[!] Миграция уже существует: ' . $path . '" ');
+        }
+
+        $stub = file_get_contents(project_path('framework/stubs/migration.stub'));
+
+        $stub = str_replace('%table%', $table, $stub);
+
+        file_put_contents($path, $stub);
+
+        echo '[OK] Миграция создана: ' . $path;
+
+        break;
+
+    case 'help':
+    case '--help':
+    case '-h':
+    default:
+        echo "Доступные команды:" . PHP_EOL;
+        echo "  [Сервер]" . PHP_EOL;
+        echo "      - php please serve <port?> .................. Запустить сервер" . PHP_EOL;
+        echo "  [Создать]" . PHP_EOL;
+        echo "      - php please make:component <name> .......... Создать компонент" . PHP_EOL;
+        echo "      - php please make:event <name> .............. Создать событие" . PHP_EOL;
+        echo "      - php please make:middleware <name> ......... Создать мидлварь" . PHP_EOL;
+        echo "      - php please make:migration <table> ......... Создать миграцию" . PHP_EOL;
+        echo "  [Миграции]" . PHP_EOL;
+        echo "      - php please migrate:up ..................... Накатить миграции" . PHP_EOL;
+        echo "      - php please migrate:down ................... Откатить миграции" . PHP_EOL;
+        echo "      - php please migrate:fresh .................. Перекатить все таблицы" . PHP_EOL;
+        break;
+}
