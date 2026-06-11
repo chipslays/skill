@@ -9,6 +9,9 @@ use Dotenv\Dotenv;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher as IlluminateEventDispatcher;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RegexIterator;
 
 class Bootstrap
 {
@@ -29,15 +32,61 @@ class Bootstrap
     {
         $path = rtrim($path, '\/');
 
-        foreach (glob($path . '/*.php') as $file) {
-            $key = basename($file, '.php');
-            $value = $key === 'alice' ? require $file : [$key => require $file];
-            $this->settings = array_merge($this->settings, $value);
-        }
+        $this->settings = array_merge($this->settings, $this->loadSettings($path, $path));
 
         date_default_timezone_set($this->settings['timezone']);
 
         return $this;
+    }
+
+    protected function loadSettings(string $basePath, string $currentPath): array
+    {
+        $result = [];
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($currentPath, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            if (!$file->isFile() || $file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $relativePath = ltrim(str_replace($basePath, '', $file->getPath()), '\/');
+            $key = $file->getBasename('.php');
+            $value = require $file->getPathname();
+
+            // alice.php в корне — merge напрямую
+            if ($relativePath === '' && $key === 'alice') {
+                $result = array_merge($result, $value);
+                continue;
+            }
+
+            // Строим ключи из папок + имени файла
+            $keys = $relativePath !== ''
+                ? [...explode(DIRECTORY_SEPARATOR, $relativePath), $key]
+                : [$key];
+
+            $result = array_merge_recursive($result, $this->buildNested($keys, $value));
+        }
+
+        return $result;
+    }
+
+    protected function buildNested(array $keys, mixed $value): array
+    {
+        $result = [];
+        $ref = &$result;
+
+        foreach ($keys as $key) {
+            $ref[$key] = [];
+            $ref = &$ref[$key];
+        }
+
+        $ref = $value;
+
+        return $result;
     }
 
     public function withEvents(string $path): static
@@ -47,9 +96,15 @@ class Bootstrap
 
         $path = rtrim($path, '\/');
 
-        foreach (glob($path . '/**/*.php') as $file) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+
+        $phpFiles = new RegexIterator($iterator, '/\.php$/i');
+
+        foreach ($phpFiles as $file) {
             (static function (Alice $alice) use ($file) {
-                require_once $file;
+                require_once $file->getPathname();
             })($alice);
         }
 
