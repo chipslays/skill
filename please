@@ -2,135 +2,95 @@
 
 <?php
 
-use Dotenv\Dotenv;
 use Framework\Database\Migration\Manager;
 
 require __DIR__ . '/vendor/autoload.php';
 
-Dotenv::createImmutable(__DIR__)->load();
-
 switch ($argv[1] ?? null) {
+
     case 'serve':
         $port = $argv[2] ?? 8000;
-
         echo '[ОК] Вебхук: http://localhost:' . $port . '/webhook.php' . PHP_EOL;
         echo '[!] Необходимо дополнительно запустить тунель, если хотите тестировать в Диалогах.' . PHP_EOL . PHP_EOL;
-
         shell_exec("php -S localhost:{$port} -t public");
-
         break;
 
     case 'migrate:up':
         Manager::up();
-
         break;
 
     case 'migrate:down':
         $confirm = readline('[!] Действительно удалить все таблицы? [y/N]: ');
-
         if ($confirm && strtolower($confirm) === 'y') {
             Manager::down();
         }
-
         break;
 
     case 'migrate:fresh':
         $confirm = readline('[!] Вы действительно хотите удалить все данные? [y/N]: ');
-
         if ($confirm && strtolower($confirm) === 'y') {
             Manager::fresh();
         } else {
             echo '[!] Галя, у нас отмена, отмена действия.' . PHP_EOL;
         }
-
         break;
 
     case 'make:component':
         if (!isset($argv[2])) {
             die('[!] Укажите название компонента: php please make:component <name>.');
         }
-
-        $name = $argv[2];
-        $path = project_path('alice/Components/' . $name . '.php');
-
-        if (file_exists($path)) {
-            die('[!] Компонент уже существует: ' . $path . '" ');
-        }
-
-        $stub = file_get_contents(project_path('framework/stubs/component.stub'));
-
-        $stub = str_replace('%name%', $name, $stub);
-
-        file_put_contents($path, $stub);
-
-        echo '[OK] Компонент создан: ' . $path;
-
+        makeScaffold(
+            stubFile: 'framework/stubs/component.stub',
+            basePath: 'alice/Components',
+            fullName: $argv[2],
+            entityName: 'Компонент',
+            fileName: 'Component',
+            fullNameIsDir: true
+        );
         break;
 
     case 'make:event':
         if (!isset($argv[2])) {
-            die('[!] Укажите название контролера: php please make:event <name>.');
+            die('[!] Укажите название события: php please make:event <name>.');
         }
-
-        $name = $argv[2];
-        $path = project_path('alice/Events/' . $name . '.php');
-
-        if (file_exists($path)) {
-            die('[!] Событие уже существует: ' . $path . '" ');
-        }
-
-        $stub = file_get_contents(project_path('framework/stubs/event.stub'));
-
-        $stub = str_replace('%name%', $name, $stub);
-
-        file_put_contents($path, $stub);
-
-        echo '[OK] Событие создано: ' . $path;
-
+        $segments  = explode('/', str_replace('\\', '/', $argv[2]));
+        $className = end($segments);
+        makeScaffold(
+            stubFile: 'framework/stubs/event.stub',
+            basePath: 'alice/Events',
+            fullName: $argv[2],
+            entityName: 'Событие',
+            fileName: $className
+        );
         break;
 
     case 'make:middleware':
         if (!isset($argv[2])) {
             die('[!] Укажите название мидлвари: php please make:middleware <name>.');
         }
-
-        $name = $argv[2];
-        $path = project_path('alice/Middlewares/' . $name . '.php');
-
-        if (file_exists($path)) {
-            die('[!] Мидлварь уже существует: ' . $path . '" ');
-        }
-
-        $stub = file_get_contents(project_path('framework/stubs/middleware.stub'));
-
-        $stub = str_replace('%name%', $name, $stub);
-
-        file_put_contents($path, $stub);
-
-        echo '[OK] Мидлварь создана: ' . $path;
-
+        $segments  = explode('/', str_replace('\\', '/', $argv[2]));
+        $className = end($segments);
+        makeScaffold(
+            stubFile: 'framework/stubs/middleware.stub',
+            basePath: 'alice/Middlewares',
+            fullName: $argv[2],
+            entityName: 'Мидлварь',
+            fileName: $className
+        );
         break;
 
     case 'make:migration':
         if (!isset($argv[2])) {
             die('[!] Укажите название таблицы: php please make:migration <table>.');
         }
-
         $table = $argv[2];
-        $path = project_path('database/migrations/' . time() . '-table-' . $table . '.php');
-
+        $path  = project_path('database/migrations/' . time() . '-table-' . $table . '.php');
         if (file_exists($path)) {
-            die('[!] Миграция уже существует: ' . $path . '" ');
+            die("[!] Миграция уже существует: {$path}");
         }
-
-        $stub = file_get_contents(project_path('framework/stubs/migration.stub'));
-
-        $stub = str_replace('%table%', $table, $stub);
-
+        $stub = str_replace('%table%', $table, file_get_contents(project_path('framework/stubs/migration.stub')));
         file_put_contents($path, $stub);
-
         echo '[OK] Миграция создана: ' . $path;
-
         break;
 
     case 'help':

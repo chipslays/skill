@@ -1,12 +1,12 @@
 <?php
 
-namespace Alice\Components\%name%;
+namespace Alice\Components\%namespace%;
 
-use Alice\Component as BaseComponent;
+use Alice\Alice;
 
-class Component extends BaseComponent
+class Component
 {
-    public function register()
+    public function register(Alice $alice)
     {
         //
     }

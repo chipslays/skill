@@ -3,7 +3,6 @@
 namespace Framework\Database\Models;
 
 use Alice\Context;
-use Alice\State;
 use Alice\Support\Container;
 use Illuminate\Database\Eloquent\Model;
 

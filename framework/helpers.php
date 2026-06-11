@@ -32,3 +32,70 @@ if (!function_exists('database_path')) {
         return rtrim(project_path('database/' . $path), '\/');
     }
 }
+
+if (!function_exists('makeScaffold')) {
+    /**
+     * Создаёт новый файл на основе шаблона (stub).
+     *
+     * @param string $stubFile Относительный путь к шаблону (от корня проекта).
+     * @param string $basePath Относительный путь к целевой директории (от корня проекта).
+     * @param string $fullName Введённое пользователем имя, например "Auth/Login" или "LoginEvent".
+     * @param string $entityName Отображаемое название сущности для сообщений ("компонент", "событие", …).
+     * @param string $fileName Имя файла без расширения, например "Component" или имя класса.
+     * @param bool $fullNameIsDir Если true, всё имя $fullName считается поддиректорией
+     *                            (паттерн компонента: make:component Foo -> alice/Components/Foo/Component.php).
+     *                            Если false (по умолчанию), последний сегмент — это имя класса/файла.
+     * @param array $extra Дополнительные замены в шаблоне помимо %classname% / %namespace%.
+     */
+    function makeScaffold(
+        string $stubFile,
+        string $basePath,
+        string $fullName,
+        string $entityName,
+        string $fileName,
+        bool $fullNameIsDir = false,
+        array $extra = []
+    ): void {
+        $segments = explode('/', str_replace('\\', '/', $fullName));
+        $className = $fullNameIsDir ? $fileName : end($segments);
+        $subDir = $fullNameIsDir
+            ? implode('/', $segments)
+            : implode('/', array_slice($segments, 0, -1));
+        $namespace = $subDir ? '\\' . str_replace('/', '\\', $subDir) : '';
+
+        $targetDir = rtrim(project_path($basePath . '/' . $subDir), '/');
+        $targetDir = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $targetDir);
+
+        $path = $targetDir . DIRECTORY_SEPARATOR . $fileName . '.php';
+
+        if (file_exists($path)) {
+            die("[!] {$entityName} уже существует: {$path}");
+        }
+
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+
+        $stubPath = project_path($stubFile);
+        $stub = file_get_contents($stubPath);
+
+        if ($stub === false) {
+            die("[!] Файл шаблона не найден: {$stubFile}");
+        }
+
+        $replacements = array_merge(
+            ['%classname%' => $className, '%namespace%' => $namespace],
+            $extra
+        );
+
+        $stub = str_replace(array_keys($replacements), array_values($replacements), $stub);
+
+        $stub = preg_replace('/\\\\{2,}/', '\\\\', $stub);
+
+        file_put_contents($path, $stub);
+
+        $normalizedPath = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+
+        echo "[OK] {$entityName} создан: {$normalizedPath}";
+    }
+}

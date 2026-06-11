@@ -1,10 +1,10 @@
 <?php
 
-namespace Alice\Events;
+namespace Alice\Events%namespace%;
 
 use Alice\Context;
 
-class %name%
+class %classname%
 {
     public function __invoke(Context $context)
     {

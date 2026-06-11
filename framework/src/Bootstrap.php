@@ -102,6 +102,7 @@ class Bootstrap
         }
 
         $user = $this->userModel::createOrFirst();
+
         Container::getInstance()->instance('user', $user);
     }
 }
