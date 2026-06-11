@@ -1,8 +1,8 @@
 <?php
 
-namespace Alice\Events\AudioPlayer;
+namespace Alice\Events\Skill;
 
-class PlaybackFinishedEvent
+class ShowPullEvent
 {
     public function __invoke(): void
     {

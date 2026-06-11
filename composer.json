@@ -22,10 +22,10 @@
         ]
     },
     "require": {
-        "alice-php/sdk": "^0",
         "illuminate/events": "^13.15",
         "illuminate/database": "^13.15",
-        "vlucas/phpdotenv": "^5.6"
+        "vlucas/phpdotenv": "^5.6",
+        "alice-php/sdk": "^0"
     },
     "scripts": {
         "post-root-package-install": [

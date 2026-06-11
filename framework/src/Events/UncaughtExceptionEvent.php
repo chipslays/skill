@@ -7,7 +7,7 @@ use Throwable;
 
 class UncaughtExceptionEvent
 {
-    public function __invoke(Context $context, Throwable $th)
+    public function __invoke(?Context $context, Throwable $th)
     {
         $dir = storage_path('logs/exceptions/' . date('Y-m-d'));
 

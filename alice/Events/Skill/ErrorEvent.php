@@ -1,6 +1,6 @@
 <?php
 
-namespace Alice\Events\Basic;
+namespace Alice\Events\Skill;
 
 use Framework\Events\UncaughtExceptionEvent;
 

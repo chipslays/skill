@@ -7,7 +7,7 @@ use Closure;
 
 class RequestLogger
 {
-    public function __invoke(Context $context, Closure $next)
+    public function handle(Context $context, Closure $next)
     {
         $next($context);
 
@@ -26,6 +26,6 @@ class RequestLogger
 
         $date = date('d.m.Y H:i:s');
 
-        file_put_contents($file, "[$date] " . $context . "\n\n", FILE_APPEND | LOCK_EX);
+        file_put_contents($file, "[$date] " . ($context->toJson(JSON_UNESCAPED_UNICODE)) . "\n\n", FILE_APPEND | LOCK_EX);
     }
 }

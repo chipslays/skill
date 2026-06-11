@@ -1,8 +1,8 @@
 <?php
 
-namespace Alice\Events\AudioPlayer;
+namespace Alice\Events\Skill;
 
-class PlaybackFinishedEvent
+class PurchaseConfirmationEvent
 {
     public function __invoke(): void
     {

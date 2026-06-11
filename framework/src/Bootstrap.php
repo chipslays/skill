@@ -21,6 +21,15 @@ class Bootstrap
 
     protected Alice $alice;
 
+    public function __construct(string $settingsPath)
+    {
+        $this->withSettings($settingsPath);
+
+        $settings = new Settings($this->settings);
+
+        $this->alice = new Alice($settings);
+    }
+
     public function withEnv(string $path): static
     {
         Dotenv::createImmutable($path)->load();
@@ -28,7 +37,7 @@ class Bootstrap
         return $this;
     }
 
-    public function withSettings(string $path): static
+    protected function withSettings(string $path): static
     {
         $path = rtrim($path, '\/');
 
@@ -91,9 +100,6 @@ class Bootstrap
 
     public function withEvents(string $path): static
     {
-        /** @var Alice $alice */
-        $alice = Container::getInstance()->get(Alice::class);
-
         $path = rtrim($path, '\/');
 
         $iterator = new RecursiveIteratorIterator(
@@ -105,7 +111,7 @@ class Bootstrap
         foreach ($phpFiles as $file) {
             (static function (Alice $alice) use ($file) {
                 require_once $file->getPathname();
-            })($alice);
+            })($this->alice);
         }
 
         return $this;
@@ -120,10 +126,6 @@ class Bootstrap
 
     public function boot(): Alice
     {
-        $settings = new Settings($this->settings);
-
-        $this->alice = new Alice($settings);
-
         $this->registerDatabase();
         $this->registerUser();
 

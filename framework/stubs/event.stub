@@ -2,12 +2,13 @@
 
 namespace Alice\Events%namespace%;
 
+use Alice\Alice;
 use Alice\Context;
 
 class %classname%
 {
-    public function __invoke(Context $context)
+    public function __invoke(Alice $alice, Context $context)
     {
-        //
+        $alice->reply('Сообщение из события: Alice\Events%namespace%\%classname%');
     }
 }
