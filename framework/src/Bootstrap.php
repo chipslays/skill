@@ -17,20 +17,21 @@ class Bootstrap
 {
     protected array $settings = [];
 
-    protected string $userModel;
+    protected ?string $userModel = null;
 
     protected Alice $alice;
 
-    public function __construct(string $settingsPath)
+    public function __construct()
     {
-        $this->withSettings($settingsPath);
+        $this->withEnv(project_path());
+        $this->withSettings(project_path('settings'));
 
         $settings = new Settings($this->settings);
 
         $this->alice = new Alice($settings);
     }
 
-    public function withEnv(string $path): static
+    protected function withEnv(string $path): static
     {
         Dotenv::createImmutable($path)->load();
 
@@ -150,6 +151,10 @@ class Bootstrap
     protected function registerUser(): void
     {
         if (!$this->alice->context) {
+            return;
+        }
+
+        if (!$this->userModel) {
             return;
         }
 
