@@ -3,13 +3,16 @@
 namespace Alice\Components\WhatVersion;
 
 use Alice\Alice;
+use Alice\Component as BaseComponent;
+use Alice\Context;
+use Alice\Settings;
 
-class Component
+class Component extends BaseComponent
 {
-    public function register(Alice $alice)
+    public function register(Alice $alice, Context $context, Settings $settings): void
     {
         $alice->onCommand('версия', function () use ($alice) {
-            $version = $this->get('version', 'неизвестна');
+            $version = $this->data->get('version', 'неизвестна');
             $alice->reply("Текущая версия навыка: {$version}");
         });
     }

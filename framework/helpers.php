@@ -99,3 +99,47 @@ if (!function_exists('makeScaffold')) {
         echo "[OK] {$entityName} создан: {$normalizedPath}";
     }
 }
+
+if (!function_exists('debug_log')) {
+    /**
+     * Запись отладочных сообщений в лог-файл.
+     *
+     * @param mixed ...$messages Любое количество сообщений (строки, массивы, объекты, исключения)
+     * @return void
+     */
+    function debug_log(...$messages): void
+    {
+        // Определяем путь к лог-файлу
+        $logDir = storage_path('logs');
+        $logFile = $logDir . '/debug.log';
+
+        // Создаём директорию, если её нет
+        if (!is_dir($logDir)) {
+            if (!mkdir($logDir, 0775, true) && !is_dir($logDir)) {
+                error_log("Невозможно создать директорию для логов: {$logDir}");
+                return;
+            }
+        }
+
+        // Форматируем каждое сообщение
+        $formattedMessages = array_map(function ($msg) {
+            if (is_string($msg)) {
+                return $msg;
+            }
+            if (is_array($msg) || is_object($msg)) {
+                return print_r($msg, true);
+            }
+            if ($msg instanceof Throwable) {
+                return $msg->getMessage() . "\n" . $msg->getTraceAsString();
+            }
+            return var_export($msg, true);
+        }, $messages);
+
+        // Собираем итоговую строку с временной меткой и уровнем
+        $timestamp = date('Y-m-d H:i:s');
+        $entry = "[{$timestamp}] " . implode("\n", $formattedMessages) . "\n";
+
+        // Атомарная запись (флаг LOCK_EX для конкурентного доступа)
+        file_put_contents($logFile, $entry, FILE_APPEND | LOCK_EX);
+    }
+}

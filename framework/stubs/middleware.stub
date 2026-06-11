@@ -3,11 +3,12 @@
 namespace Alice\Middlewares%namespace%;
 
 use Alice\Context;
+use Alice\Contracts\Middleware;
 use Closure;
 
-class %classname%
+class %classname% implements Middleware
 {
-    public function __invoke(Context $context, Closure $next)
+    public function handle(Context $context, Closure $next)
     {
         $next($context);
     }
