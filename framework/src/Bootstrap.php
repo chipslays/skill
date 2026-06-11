@@ -42,10 +42,15 @@ class Bootstrap
 
     public function withEvents(string $path): static
     {
+        /** @var Alice $alice */
+        $alice = Container::getInstance()->get(Alice::class);
+
         $path = rtrim($path, '\/');
 
         foreach (glob($path . '/**/*.php') as $file) {
-            require $file;
+            (static function (Alice $alice) use ($file) {
+                require_once $file;
+            })($alice);
         }
 
         return $this;
