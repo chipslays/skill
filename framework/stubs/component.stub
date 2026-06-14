@@ -1,0 +1,16 @@
+<?php
+
+namespace Alice\Components\%namespace%;
+
+use Alice\Alice;
+use Alice\Component as BaseComponent;
+use Alice\Context;
+use Alice\Settings;
+
+class Component extends BaseComponent
+{
+    public function register(Alice $alice, Context $context, Settings $settings): void
+    {
+        //
+    }
+}

@@ -1,0 +1,15 @@
+<?php
+
+namespace Alice\Middlewares%namespace%;
+
+use Alice\Context;
+use Alice\Contracts\Middleware;
+use Closure;
+
+class %classname% implements Middleware
+{
+    public function handle(Context $context, Closure $next)
+    {
+        $next($context);
+    }
+}
