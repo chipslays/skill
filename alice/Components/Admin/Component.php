@@ -8,11 +8,7 @@ use Alice\Components\Admin\Events\AuthEvent;
 use Alice\Components\Admin\Events\UsersCountEvent;
 use Alice\Components\Admin\Middlewares\EnsureIsAdmin;
 use Alice\Context;
-use Alice\Events\Group;
-use Alice\Models\User;
 use Alice\Settings;
-use Alice\State\Session;
-use Carbon\Carbon;
 
 class Component extends BaseComponent
 {
