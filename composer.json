@@ -33,11 +33,7 @@
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
-<<<<<<< HEAD
-            "@php alice migrate:up"
-=======
             "@php please migrate:up"
->>>>>>> 159bf0493a5ad0d940047b8e64632876c589ad65
         ]
     },
     "require-dev": {
